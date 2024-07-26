@@ -95,7 +95,7 @@ def copy_image_to_resized_folder(src_folder, dest_folder, image_name, new_image_
         print("Resized", src_path)
         # Save the resized image
         resized_img.save(dest_path)
-        
+
         #shutil.copy2(src_path, dest_path)
         print(f"Copied '{src_path}' to '{dest_path}' successfully.")
 
@@ -110,6 +110,7 @@ resized_folder_path = "COB_resized"
 folder_names = get_folder_names(directory_path)
 folder_name_paths = [os.path.join(directory_path, folder_name) for folder_name in folder_names]
 
+#Naming and resizing the image
 image_counter = 1
 for folder in folder_name_paths:
     images = get_image_files(folder)
@@ -117,7 +118,7 @@ for folder in folder_name_paths:
         new_image_name = f"cob_{image_counter}.jpg"
         
         #rename_image(folder, image, new_image_name)
-        copy_image_to_resized_folder(folder, resized_folder_path, new_image_name, new_image_name)
+        #copy_image_to_resized_folder(folder, resized_folder_path, new_image_name, new_image_name)
         image_counter += 1
 
 print(f"Renamed {image_counter - 1} images.")
@@ -127,3 +128,4 @@ print(f"Renamed {image_counter - 1} images.")
 #folder_name_paths = [os.path.join(directory_path, folder_name) for folder_name in folder_names]
 #print(folder_name_paths)
 
+copy_image_to_resized_folder(directory_path, "cob_1.jpg", image_name, new_image_name)
