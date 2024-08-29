@@ -51,7 +51,9 @@ def train_model(generator, discriminator, train_loader, num_epochs=100, device='
             if i % 100 == 0:
                 print(f"[Epoch {epoch}/{num_epochs}] [Batch {i}/{len(train_loader)}] [D loss: {d_loss.item():.4f}] [G loss: {g_loss.item():.4f}]")
 
-        # Optionally save model checkpoints or generated images after each epoch
+        # Save model weights after each epoch
+        torch.save(generator.state_dict(), f'generator_epoch_{epoch+1}.pth')
+        torch.save(discriminator.state_dict(), f'discriminator_epoch_{epoch+1}.pth')
 
     # Optionally return the trained models
     return generator, discriminator
