@@ -2,27 +2,31 @@ import os
 import torch
 from torch.utils.data import Dataset
 from PIL import Image
+from torchvision import transforms
 
-class CustomImageDataset(Dataset):
-    def __init__(self, image_dir, transform=None):
-        self.image_dir = image_dir
-        self.image_filenames = [f for f in os.listdir(image_dir) if f.endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))]
-        self.transform = transform
+class EdgeToRealDataset(Dataset):
+    def __init__(self, edge_dir, real_image_dir, transform=None):
+        self.edge_dir = edge_dir
+        self.real_image_dir = real_image_dir
+        self.tranform = tranform
+
+        self.edge_images = sorted(os.listdir(self.edge_dir))
+        self.real_images = sorted(os.listdir(self.real_image_dir))
+
+        assert len(self.edge_images) == len(self.real_images), "Number of edge images should be the same as number of real images"
 
     def __len__(self):
-        return len(self.image_filenames)
+        return len(self.real_images)
 
     def __getitem__(self, idx):
-        img_name = os.path.join(self.image_dir, self.image_filenames[idx])
-        image = Image.open(img_name)
+        edge_image_path = os.path.join(self.edge_dir, self.edge_images[idx])
+        real_image_path = os.path.join(self.real_image_dir, self.real_images[idx])
 
-        if self.transform:
-            image = self.transform(image)
+        edge_image = Image.open(edge_image_path).convert("RGB")
+        real_image = Image.open(real_image_path).convert("RGB")
 
-        return image
+        if self.tranform:
+            edge_image = self.tranform(edge_image)
+            real_image = self.tranform(real_image)
 
-# Example usage (if running this file standalone)
-if __name__ == "__main__":
-    dataset = CustomImageDataset(image_dir='path/to/images')
-    print(len(dataset))
-    print(dataset[0])
+        return edge_image, real_image
