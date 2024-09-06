@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 
-class Discriminator(nn.Module):
+class PatchGANDiscriminator(nn.Module):
     def __init__(self):
-        super(Discriminator, self).__init__()
+        super(PatchGANDiscriminator, self).__init__()
 
         def conv_block(in_channels, out_channels, kernel_size=4, stride=2, padding=1, normalize=True):
             layers = [nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=False)]

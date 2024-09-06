@@ -8,7 +8,7 @@ class EdgeToRealDataset(Dataset):
     def __init__(self, edge_dir, real_image_dir, transform=None):
         self.edge_dir = edge_dir
         self.real_image_dir = real_image_dir
-        self.tranform = tranform
+        self.transform = transform
 
         self.edge_images = sorted(os.listdir(self.edge_dir))
         self.real_images = sorted(os.listdir(self.real_image_dir))
@@ -25,8 +25,8 @@ class EdgeToRealDataset(Dataset):
         edge_image = Image.open(edge_image_path).convert("RGB")
         real_image = Image.open(real_image_path).convert("RGB")
 
-        if self.tranform:
-            edge_image = self.tranform(edge_image)
-            real_image = self.tranform(real_image)
+        if self.transform:
+            edge_image = self.transform(edge_image)
+            real_image = self.transform(real_image)
 
         return edge_image, real_image
