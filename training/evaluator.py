@@ -1,6 +1,24 @@
 import torch
-import torchvision.utils as vutils
-import os
+from torch_fidelity import calculate_metrics
+from pytorch_fid import fid_score
+
+
+
+def compute_fid(real_images_dir, generated_images_dir):
+    """
+    Compute the FID score between real and generated images using image directories.
+    
+    Args:
+    - real_images_dir (str): Directory containing real images.
+    - generated_images_dir (str): Directory containing generated images.
+    
+    Returns:
+    - fid (float): The FID score.
+    """
+    # FID feature dimensionality is typically 2048 for Inception model features
+    fid = fid_score.calculate_fid_given_paths([real_images_dir, generated_images_dir], batch_size=50, device='cuda', dims=2048)
+    return fid
+
 
 def evaluate_pix2pix(generator, dataloader, device='cuda', save_path='output', epoch=None, num_images_to_save=64):
     generator.eval()
@@ -14,19 +32,53 @@ def evaluate_pix2pix(generator, dataloader, device='cuda', save_path='output', e
 
             fakes = generator(edges)
 
-            real_images.append(reals)
-            generated_images.append(fakes)
+            real_images.append(reals.cpu())
+            generated_images.append(fakes.cpu())
 
     real_images = torch.cat(real_images, dim=0)
     generated_images = torch.cat(generated_images, dim=0)
 
+    # Compute FID in memory
     fid = compute_fid(real_images, generated_images)
-    inception_score = compute_is(generated_images)
-
+    
     print(f"FID: {fid}")
-    print(f"Inception Score: {inception_score}")
+    
+    # After evaluation, switch back to training mode
+    generator.train()  # Set the model back to train mode
 
-    return fid, inception_score
+    return fid
+
+# import torch
+# import torchvision.utils as vutils
+# import os
+
+# def evaluate_pix2pix(generator, dataloader, device='cuda', save_path='output', epoch=None, num_images_to_save=64):
+#     generator.eval()
+#     real_images = []
+#     generated_images = []
+
+#     with torch.no_grad():
+#         for edges, reals in dataloader:
+#             edges = edges.to(device)
+#             reals = reals.to(device)
+
+#             fakes = generator(edges)
+
+#             real_images.append(reals)
+#             generated_images.append(fakes)
+
+#     real_images = torch.cat(real_images, dim=0)
+#     generated_images = torch.cat(generated_images, dim=0)
+
+#     fid = compute_fid(real_images, generated_images)
+#     inception_score = compute_is(generated_images)
+
+#     print(f"FID: {fid}")
+#     print(f"Inception Score: {inception_score}")
+
+#     return fid, inception_score
+
+
 
     
     # generator.eval()  # Set the generator to evaluation mode

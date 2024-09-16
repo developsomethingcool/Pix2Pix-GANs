@@ -23,22 +23,22 @@ class UNetGenerator(nn.Module):
             return layers
 
         self.model = nn.Sequential(
-            *conv_block(3, 64, normalize=False),  # C64
-            *conv_block(64, 128),  # C128
-            *conv_block(128, 256),  # C256
-            *conv_block(256, 512),  # C512
-            *conv_block(512, 512),  # C512
-            *conv_block(512, 512),  # C512
-            *conv_block(512, 512),  # C512
-            *conv_block(512, 512),  # C512
-            *deconv_block(512, 512),  # CD512
-            *deconv_block(512, 512),  # CD512
-            *deconv_block(512, 512),  # CD512
-            *deconv_block(512, 512),  # C512
-            *deconv_block(512, 256),  # C256
-            *deconv_block(256, 128),  # C128
-            *deconv_block(128, 64),  # C64
-            nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1),  # Final layer
+            *conv_block(3, 64, normalize=False),  
+            *conv_block(64, 128), 
+            *conv_block(128, 256),  
+            *conv_block(256, 512),  
+            *conv_block(512, 512),  
+            *conv_block(512, 512),  
+            *conv_block(512, 512), 
+            *conv_block(512, 512), 
+            *deconv_block(512, 512),  
+            *deconv_block(512, 512), 
+            *deconv_block(512, 512),  
+            *deconv_block(512, 512),  
+            *deconv_block(512, 256),  
+            *deconv_block(256, 128),  
+            *deconv_block(128, 64),  
+            nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1),
             nn.Tanh()
         )
 

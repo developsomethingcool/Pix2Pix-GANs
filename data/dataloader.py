@@ -14,7 +14,6 @@ def get_dataloaders(edge_dir, real_image_dir, batch_size=16, val_split=0.2, test
     ])
 
     dataset = EdgeToRealDataset(edge_dir=edge_dir, real_image_dir=real_image_dir, transform=transform)
-    #dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
 
     # Calculate split sizes for train, val, and test sets
     dataset_size = len(dataset)
@@ -24,7 +23,7 @@ def get_dataloaders(edge_dir, real_image_dir, batch_size=16, val_split=0.2, test
 
     # Randomly shuffle and split dataset indices
     indices = np.arange(dataset_size)
-    np.random.shuffle(indices)
+    indices = np.random.shuffle(indices)
 
     # Create subsets using the shuffled indices
     train_indices = indices[:train_size]

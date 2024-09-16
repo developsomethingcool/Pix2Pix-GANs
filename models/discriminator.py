@@ -13,12 +13,12 @@ class PatchGANDiscriminator(nn.Module):
             return layers
 
         self.model = nn.Sequential(
-            *conv_block(3, 64, normalize=False),  # C64
-            *conv_block(64, 128),  # C128
-            *conv_block(128, 256),  # C256
-            *conv_block(256, 512),  # C512
-            nn.Conv2d(512, 1, kernel_size=4, stride=1, padding=0),  # Final convolutional layer
-            nn.Sigmoid()  # Sigmoid activation for binary classification
+            *conv_block(3, 64, normalize=False),  
+            *conv_block(64, 128),  
+            *conv_block(128, 256),  
+            *conv_block(256, 512),  
+            nn.Conv2d(512, 1, kernel_size=4, stride=1, padding=0),  
+            nn.Sigmoid()
         )
 
     def forward(self, x):
