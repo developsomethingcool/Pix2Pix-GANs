@@ -1,31 +1,18 @@
 import torch
 
-def save_checkpoint(generator, discriminator, opt_gen, opt_disc, scaler, epoch, file_name='checkpoint.pth.tar'):
-    torch.save({
-        'epoch': epoch,
-        'generator_state_dict': generator.state_dict(),
-        'discriminator_state_dict': discriminator.state_dict(),
-        'opt_gen_state_dict': opt_gen.state_dict(),
-        'opt_disc_state_dict': opt_disc.state_dict(),
-        'scaler': scaler.state_dict()  # Optional if using mixed precision
-    }, file_name)
+def save_checkpoint(state, filename='checkpoint.pth.tar'):
+    print(f"Saving checkpoint to {filename}")
+    torch.save(state, filename)
 
+def load_checkpoint(checkpoint_path, model, model_key, optimizer=None, optimizer_key=None, device='cpu'):
+    print(f"Loading checkpoint from {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    model.load_state_dict(checkpoint[model_key])
+    print(f"Checkpoint for {model_key} loaded successfully")
 
-def load_checkpoint(checkpoint_path, model, optimizer=None, scaler=None, model_type='generator'):
-    checkpoint = torch.load(checkpoint_path)
-    if model_type == 'generator':
-        model.load_state_dict(checkpoint['generator_state_dict'])
-        if optimizer:
-            optimizer.load_state_dict(checkpoint['opt_gen_state_dict'])
-    elif model_type == 'discriminator':
-        model.load_state_dict(checkpoint['discriminator_state_dict'], strict=False)
-        if optimizer:
-            optimizer.load_state_dict(checkpoint['opt_disc_state_dict'])
-    
-    if scaler and 'scaler' in checkpoint:
-        scaler.load_state_dict(checkpoint['scaler'])
-    print("=> Checkpoint loaded successfully")
-
+    if optimizer and optimizer_key:
+        optimizer.load_state_dict(checkpoint[optimizer_key])
+        print(f"Optimizer state for {optimizer_key} loaded successfully")
 
 
 # def save_checkpoint(state, filename="checkpoint.pth"):

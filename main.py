@@ -1,4 +1,5 @@
 import torch
+import torch.optim as optim
 from data import get_dataloaders
 from models.generator import UNetGenerator
 from models.discriminator import PatchGANDiscriminator
@@ -40,17 +41,17 @@ def generate_images(generator, dataloader, device, save_path='generated_images',
 
 def main():
     task = 'train'  # Options: 'train', 'eval', 'generate'
-    edge_dir = 'edges'  # Set the default path for edge images
-    real_image_dir = 'real_images'  # Set the default path for real images
-    checkpoint_path = "pix2pix_checkpoint_epoch_100.pth.tar"
-    #checkpoint_path = None
-    # Set to a specific checkpoint path to resume training
+    edge_dir = 'edges'
+    real_image_dir = 'real_images'
+    #checkpoint_path = "pix2pix_checkpoint_epoch_295.pth.tar"
+    checkpoint_path = None
+
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    num_epochs = 201  # Default number of epochs
-    batch_size = 16  # Default batch size
-    lr = 2e-4  # Default learning rate
-    lambda_l1 = 100  # Weight for L1 loss in the generator
-    
+    num_epochs = 100
+    batch_size = 16
+    lr = 2e-4
+    lambda_l1 = 100
+
     print(f"Task: {task}")
     print(f"Edge images directory: {edge_dir}")
     print(f"Real images directory: {real_image_dir}")
@@ -61,30 +62,35 @@ def main():
     print(f"L1 weight: {lambda_l1}")
 
     # Create DataLoader
-    train_loader, val_loader, test_loader = get_dataloaders(edge_dir, real_image_dir, batch_size=batch_size, num_workers=4)
+    train_loader, val_loader, test_loader = get_dataloaders(
+        edge_dir, real_image_dir, batch_size=batch_size, num_workers=4
+    )
 
     # Initialize models
     generator = UNetGenerator().to(device)
+    discriminator = PatchGANDiscriminator().to(device) if task == 'train' else None
 
-    if task == 'train':
-        discriminator = PatchGANDiscriminator().to(device)
-    
-    # Load checkpoint for generator (and discriminator only for training)
+    # Initialize optimizers
+    opt_gen = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
+    opt_disc = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999)) if task == 'train' else None
+
+    # Load checkpoint
+    start_epoch = 0
     if checkpoint_path:
         print(f"Loading checkpoint from {checkpoint_path}")
-        load_checkpoint(checkpoint_path, generator)
+        checkpoint = torch.load(checkpoint_path, map_location=device)
+        load_checkpoint(checkpoint_path, generator, 'generator_state_dict', optimizer=opt_gen, optimizer_key='opt_gen_state_dict', device=device)
         if task == 'train':
-            load_checkpoint(checkpoint_path, discriminator)
+            load_checkpoint(checkpoint_path, discriminator, 'discriminator_state_dict', optimizer=opt_disc, optimizer_key='opt_disc_state_dict', device=device)
+        start_epoch = checkpoint['epoch'] + 1  # Continue from the next epoch
 
-    # Perform task based on the 'task' variable
+    # Perform task
     if task == 'train':
         print("Starting training...")
-        train_pix2pix(generator, discriminator, train_loader, num_epochs=num_epochs, lr=lr, lambda_l1=lambda_l1, device=device)
-
+        train_pix2pix(generator, discriminator, train_loader, opt_gen, opt_disc, num_epochs=num_epochs, start_epoch=start_epoch, lr=lr, lambda_l1=lambda_l1, device=device)
     elif task == 'eval':
         print("Starting evaluation...")
-        evaluate_pix2pix(generator, val_loader, device)
-
+        evaluate_pix2pix(generator, val_loader, device, save_path='evaluation_results', num_images_to_save=16)
     elif task == 'generate':
         print("Generating images...")
         generate_images(generator, test_loader, device, save_path='generated_images', num_images_to_save=64)

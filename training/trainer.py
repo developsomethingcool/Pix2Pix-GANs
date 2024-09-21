@@ -4,16 +4,16 @@ import torch.optim as optim
 from tqdm import tqdm
 from utils.utils import save_checkpoint, load_checkpoint
 
-def train_pix2pix(generator, discriminator, dataloader, num_epochs=100, lr=2e-4, lambda_l1=100, device="cuda"):
+def train_pix2pix(generator, discriminator, dataloader, opt_gen, opt_disc, num_epochs=100, start_epoch=1, lr=2e-4, lambda_l1=100, device="cuda"):
     # Optimizers for generator and discriminator
-    opt_gen = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
-    opt_disc = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))
+    #opt_gen = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
+    #opt_disc = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))
 
     # Loss functions
     criterion_gan = nn.BCELoss()  # Binary Cross-Entropy for GAN loss
     criterion_l1 = nn.L1Loss()    # L1 loss for pixel-wise similarity
 
-    for epoch in range(num_epochs):
+    for epoch in range(start_epoch, num_epochs+1):
         loop = tqdm(dataloader, leave=True)
         for idx, (edges, reals) in enumerate(loop):
             edges, reals = edges.to(device), reals.to(device)
@@ -66,15 +66,25 @@ def train_pix2pix(generator, discriminator, dataloader, num_epochs=100, lr=2e-4,
             loop.set_description(f"Epoch [{epoch+1}/{num_epochs}]")
             loop.set_postfix(loss_gen=loss_gen.item(), loss_disc=loss_disc.item())
 
-        # Optionally save model checkpoints
-        if (epoch + 1) % 5 == 0:
-            save_checkpoint({
-                'epoch': epoch + 1,
-                'generator_state_dict': generator.state_dict(),
-                'discriminator_state_dict': discriminator.state_dict(),
-                'opt_gen_state_dict': opt_gen.state_dict(),
-                'opt_disc_state_dict': opt_disc.state_dict(),
-            }, filename=f"pix2pix_checkpoint_epoch_{epoch+1}.pth.tar")
+            # Save checkpoint
+            if (epoch) % 5 == 0:
+                save_checkpoint({
+                    'epoch': epoch,
+                    'generator_state_dict': generator.state_dict(),
+                    'discriminator_state_dict': discriminator.state_dict(),
+                    'opt_gen_state_dict': opt_gen.state_dict(),
+                    'opt_disc_state_dict': opt_disc.state_dict(),
+                }, filename=f"pix2pix_checkpoint_epoch_{epoch}.pth.tar")
+
+        # # Optionally save model checkpoints
+        # if (epoch + 1) % 5 == 0:
+        #     save_checkpoint({
+        #         'epoch': epoch + 1,
+        #         'generator_state_dict': generator.state_dict(),
+        #         'discriminator_state_dict': discriminator.state_dict(),
+        #         'opt_gen_state_dict': opt_gen.state_dict(),
+        #         'opt_disc_state_dict': opt_disc.state_dict(),
+        #     }, filename=f"pix2pix_checkpoint_epoch_{epoch+1}.pth.tar")
 
 # def train_model(generator, discriminator, train_loader, num_epochs=100, device='cuda'):
 #     adversarial_loss = nn.BCELoss().to(device)
