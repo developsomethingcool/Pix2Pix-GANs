@@ -12,9 +12,15 @@ def load_checkpoint(checkpoint_path, model, model_key, optimizer=None, optimizer
     model.load_state_dict(checkpoint[model_key])
     print(f"Checkpoint for {model_key} loaded successfully")
 
+    # Load optimizer if provided
     if optimizer and optimizer_key:
         optimizer.load_state_dict(checkpoint[optimizer_key])
         print(f"Optimizer state for {optimizer_key} loaded successfully")
+
+    # Load scheduler state if provided
+    if scheduler and scheduler_key and scheduler_key in checkpoint:
+        scheduler.load_state_dict(checkpoint[scheduler_key])
+        print(f"Scheduler state for {scheduler_key} loaded successfully")
 
 def generate_images(generator, dataloader, device, save_path='generated_images', num_images_to_save=64):
     """

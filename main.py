@@ -1,5 +1,6 @@
 import torch
 import torch.optim as optim
+from torch.optim import lr_scheduler
 import torchvision
 from data import get_dataloaders
 from models.generator import UNetGenerator
@@ -11,12 +12,12 @@ import tarfile
 import os
 
 def main():
-    task = 'generate'  # Options: 'train', 'eval', 'generate'
+    task = 'train'  # Options: 'train', 'eval', 'generate'
     edge_dir = 'edges'
     real_image_dir = 'real_images'
     
-    #checkpoint_path = None
-    checkpoint_path = "pix2pix_checkpoint_epoch_295.pth.tar"
+    checkpoint_path = None
+    #checkpoint_path = "pix2pix_checkpoint_epoch_295.pth.tar"
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     num_epochs = 100
@@ -46,20 +47,58 @@ def main():
     opt_gen = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
     opt_disc = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999)) if task == 'train' else None
 
+
+    #Initializing learning rate scheduler
+    if task == "train":
+        scheduler_gen = optim.lr_scheduler.LambdaLR(
+            opt_gen, 
+            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+        )
+        scheduler_disc = optim.lr_scheduler.LambdaLR(
+            opt_disc, 
+            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+        )
+    else:
+        scheduler_gen = None
+        scheduler_disc = None
+
     # Load checkpoint
     start_epoch = 1
-    if checkpoint_path:
+    if checkpoint_path and os.path.isfile(checkpoint_path):
         print(f"Loading checkpoint from {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path, map_location=device)
-        load_checkpoint(checkpoint_path, generator, 'generator_state_dict', optimizer=opt_gen, optimizer_key='opt_gen_state_dict', device=device)
-        if task == 'train':
-            load_checkpoint(checkpoint_path, discriminator, 'discriminator_state_dict', optimizer=opt_disc, optimizer_key='opt_disc_state_dict', device=device)
-        start_epoch = checkpoint['epoch'] + 1  # Continue from the next epoch
+        load_checkpoint(
+            checkpoint_path, 
+            generator, 
+            'generator_state_dict', 
+            optimizer=opt_gen, 
+            optimizer_key='opt_gen_state_dict', 
+            scheduler=scheduler_gen, 
+            scheduler_key='scheduler_gen_state_dict', 
+            device=device
+        )
+        if task == 'train' and 'discriminator_state_dict' in checkpoint:
+            load_checkpoint(
+                checkpoint_path, 
+                discriminator, 
+                'discriminator_state_dict', 
+                optimizer=opt_disc, 
+                optimizer_key='opt_disc_state_dict', 
+                scheduler=scheduler_disc, 
+                scheduler_key='scheduler_disc_state_dict', 
+                device=device
+            )
+        if task == 'train' and 'epoch' in checkpoint:
+            start_epoch = checkpoint['epoch'] + 1  
+        print(f"Resuming training from epoch {start_epoch}")
+
+
 
     # Perform task
     if task == 'train':
         print("Starting training...")
-        train_pix2pix(generator, discriminator, train_loader, opt_gen, opt_disc, num_epochs=num_epochs, start_epoch=start_epoch, lr=lr, lambda_l1=lambda_l1, device=device)
+        train_pix2pix(generator, discriminator, train_loader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=num_epochs, start_epoch=start_epoch, lr=lr, lambda_l1=lambda_l1, device=device)
+        
     elif task == 'eval':
         print("Starting evaluation...")
         evaluate_pix2pix(generator, val_loader, device, save_path='evaluation_results', num_images_to_save=16)
