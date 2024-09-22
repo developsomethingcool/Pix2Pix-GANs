@@ -1,51 +1,23 @@
 import torch
 import torch.optim as optim
+import torchvision
 from data import get_dataloaders
 from models.generator import UNetGenerator
 from models.discriminator import PatchGANDiscriminator
 from training import train_pix2pix
 from training.evaluator import evaluate_pix2pix
-from utils.utils import load_checkpoint
+from utils.utils import load_checkpoint, generate_images
 import tarfile
-
-#checkpoint_path = "C:/Users/opometun/Desktop/Thesis/pix2pix_checkpoint_epoch_100.pth/pix2pix_checkpoint_epoch_100.pth/data.pkl"
-
-
-# checkpoint = torch.load('pix2pix_checkpoint_epoch_200.pth.tar')
-# print(checkpoint.keys())  # This will show 'generator_state_dict', 'discriminator_state_dict', etc.
-
-# # To inspect the keys of the discriminator's state_dict
-# print(checkpoint['discriminator_state_dict'].keys())
-
-# model = PatchGANDiscriminator()
-# print(model.state_dict().keys())
-
-
-
-def generate_images(generator, dataloader, device, save_path='generated_images', num_images_to_save=64):
-    """
-    Function to generate and save images using a trained generator.
-    """
-    generator.eval()
-    os.makedirs(save_path, exist_ok=True)  # Create output directory if it doesn't exist
-
-    with torch.no_grad():
-        for i, (edges, _) in enumerate(dataloader):
-            edges = edges.to(device)
-            fakes = generator(edges)
-
-            if i < num_images_to_save // dataloader.batch_size:
-                vutils.save_image(fakes, os.path.join(save_path, f'generated_{i}.png'), normalize=True)
-
-    print(f"Images saved to {save_path}")
+import os
 
 def main():
-    task = 'train'  # Options: 'train', 'eval', 'generate'
+    task = 'generate'  # Options: 'train', 'eval', 'generate'
     edge_dir = 'edges'
     real_image_dir = 'real_images'
-    #checkpoint_path = "pix2pix_checkpoint_epoch_295.pth.tar"
-    checkpoint_path = None
-
+    
+    #checkpoint_path = None
+    checkpoint_path = "pix2pix_checkpoint_epoch_295.pth.tar"
+    
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     num_epochs = 100
     batch_size = 16
@@ -75,7 +47,7 @@ def main():
     opt_disc = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999)) if task == 'train' else None
 
     # Load checkpoint
-    start_epoch = 0
+    start_epoch = 1
     if checkpoint_path:
         print(f"Loading checkpoint from {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path, map_location=device)
