@@ -6,7 +6,7 @@ def save_checkpoint(state, filename='checkpoint.pth.tar'):
     print(f"Saving checkpoint to {filename}")
     torch.save(state, filename)
 
-def load_checkpoint(checkpoint_path, model, model_key, optimizer=None, optimizer_key=None, device='cpu'):
+def load_checkpoint(checkpoint_path, model, model_key, optimizer=None, optimizer_key=None,  scheduler=None, scheduler_key=None, device='cpu'):
     print(f"Loading checkpoint from {checkpoint_path}")
     checkpoint = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint[model_key])

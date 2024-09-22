@@ -12,15 +12,15 @@ import tarfile
 import os
 
 def main():
-    task = 'train'  # Options: 'train', 'eval', 'generate'
+    task = 'generate'  # Options: 'train', 'eval', 'generate'
     edge_dir = 'edges'
     real_image_dir = 'real_images'
     
-    checkpoint_path = None
-    #checkpoint_path = "pix2pix_checkpoint_epoch_295.pth.tar"
+    #checkpoint_path = None
+    checkpoint_path = "pix2pix_checkpoint_epoch_140.pth.tar"
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    num_epochs = 100
+    num_epochs = 400
     batch_size = 16
     lr = 2e-4
     lambda_l1 = 100
@@ -63,7 +63,7 @@ def main():
         scheduler_disc = None
 
     # Load checkpoint
-    start_epoch = 1
+    start_epoch = 101
     if checkpoint_path and os.path.isfile(checkpoint_path):
         print(f"Loading checkpoint from {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path, map_location=device)
@@ -90,7 +90,7 @@ def main():
             )
         if task == 'train' and 'epoch' in checkpoint:
             start_epoch = checkpoint['epoch'] + 1  
-        print(f"Resuming training from epoch {start_epoch}")
+            print(f"Resuming training from epoch {start_epoch}")
 
 
 
