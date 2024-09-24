@@ -21,7 +21,7 @@ def get_dataloaders(edge_dir, real_image_dir, batch_size=16, val_split=0.2, test
 
     # Randomly shuffle and split dataset indices
     indices = np.arange(dataset_size)
-    np.random.shuffle(indices)
+    #np.random.shuffle(indices)
 
     # Create subsets using the shuffled indices
     train_indices = indices[:train_size]

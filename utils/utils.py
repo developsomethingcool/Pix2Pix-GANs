@@ -27,7 +27,7 @@ def generate_images(generator, dataloader, device, save_path='generated_images',
     Function to generate and save images using a trained generator.
     """
     generator.eval()
-    os.makedirs(save_path, exist_ok=True)  # Create output directory if it doesn't exist
+    os.makedirs(save_path, exist_ok=True)  
 
     with torch.no_grad():
         for i, (edges, _) in enumerate(dataloader):
