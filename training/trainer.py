@@ -6,7 +6,7 @@ from utils.utils import save_checkpoint, load_checkpoint
 
 # Parameters
 n_discriminator_updates = 1  # Update the discriminator once per iteration
-n_generator_updates = 3      # Update the generator twice per iteration
+n_generator_updates = 1      # Update the generator twice per iteration
 
 def train_pix2pix(generator, discriminator, dataloader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=100, start_epoch=1, lr=2e-4, lambda_l1=100, device="cuda"):
  
