@@ -4,6 +4,10 @@ import torch.optim as optim
 from tqdm import tqdm
 from utils.utils import save_checkpoint, load_checkpoint
 
+# Parameters
+n_discriminator_updates = 1  # Update the discriminator once per iteration
+n_generator_updates = 3      # Update the generator twice per iteration
+
 def train_pix2pix(generator, discriminator, dataloader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=100, start_epoch=1, lr=2e-4, lambda_l1=100, device="cuda"):
  
     #Binary cross entropy with sigmoid layer
@@ -17,63 +21,67 @@ def train_pix2pix(generator, discriminator, dataloader, opt_gen, opt_disc, sched
         for idx, (edges, reals) in enumerate(loop):
             edges, reals = edges.to(device), reals.to(device)
 
-            # Training of discriminator
-            discriminator.train()
-            generator.eval()
+            # Update the Discriminator (n times)
+            for _ in range(n_discriminator_updates):
+                # Training of discriminator
+                discriminator.train()
+                generator.eval()
 
-            # Test discriminator on real images
-            preds_real = discriminator(reals)
+                # Test discriminator on real images
+                preds_real = discriminator(reals)
 
-            # Dynamically create the real labels 
-            real_label = torch.ones_like(preds_real, device=device)
+                # Dynamically create the real labels 
+                real_label = torch.ones_like(preds_real, device=device)
 
-            # Compute the loss of discriminator on real images
-            loss_disc_real = criterion_gan(preds_real, real_label)
+                # Compute the loss of discriminator on real images
+                loss_disc_real = criterion_gan(preds_real, real_label)
 
-            # Generate fake images based on edges
-            fakes = generator(edges)
+                # Generate fake images based on edges
+                fakes = generator(edges)
 
-            #Test discriminator on fake images 
-            preds_fake = discriminator(fakes)
+                #Test discriminator on fake images 
+                preds_fake = discriminator(fakes)
 
-            #Dynamically create fake labels
-            fake_label = torch.zeros_like(preds_fake, device=device)
+                #Dynamically create fake labels
+                fake_label = torch.zeros_like(preds_fake, device=device)
 
-            #Compute the loss of discriminator on fake images
-            loss_disc_fake = criterion_gan(preds_fake, fake_label)
+                #Compute the loss of discriminator on fake images
+                loss_disc_fake = criterion_gan(preds_fake, fake_label)
 
-            # Total discriminator loss
-            loss_disc = (loss_disc_real + loss_disc_fake) / 2
+                # Total discriminator loss
+                loss_disc = (loss_disc_real + loss_disc_fake) / 2
 
-            #Backprop and optimize discriminator
-            #Cleare the gradient
-            opt_disc.zero_grad()
-            #Compute the backprop 
-            loss_disc.backward()
-            #Update parameters
-            opt_disc.step()
-
+                #Backprop and optimize discriminator
+                #Cleare the gradient
+                opt_disc.zero_grad()
+                #Compute the backprop 
+                loss_disc.backward()
+                #Update parameters
+                opt_disc.step()
+            
+            # Update the Generator (m times)
+            for _ in range(n_generator_updates):
             # Training of a generator
-            generator.train()
-            discriminator.eval()
+                generator.train()
+                discriminator.eval()
 
-            #Generate fake images
-            fakes = generator(edges)
-            #Testing discriminator on fake images
-            preds_fake = discriminator(fakes)
-            #Loss of generator on fake images
-            loss_gan = criterion_gan(preds_fake, real_label) 
+                #Generate fake images
+                fakes = generator(edges)
+                #Testing discriminator on fake images
+                preds_fake = discriminator(fakes)
+                #Loss of generator on fake images
+                loss_gan = criterion_gan(preds_fake, real_label) 
 
-            #Normalize L1 loss, per pixel difference between fake and real images
-            loss_l1 = criterion_l1(fakes, reals) * lambda_l1 
+                #Normalize L1 loss, per pixel difference between fake and real images
+                loss_l1 = criterion_l1(fakes, reals) * lambda_l1 
 
-            # Total generator loss
-            loss_gen = loss_gan + loss_l1
+                # Total generator loss
+                loss_gen = loss_gan + loss_l1
 
-            # Backprop and optimize generator
-            opt_gen.zero_grad()
-            loss_gen.backward()
-            opt_gen.step()
+                # Backprop and optimize generator
+                opt_gen.zero_grad()
+                loss_gen.backward()
+                opt_gen.step()
 
             # Update progress bar
             loop.set_description(f"Epoch [{epoch}/{num_epochs}]")

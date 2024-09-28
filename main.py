@@ -17,13 +17,13 @@ def main():
     real_image_dir = 'real_images'
     
     #checkpoint_path = None
-    checkpoint_path = "pix2pix_checkpoint_epoch_200.pth.tar"
+    checkpoint_path = "pix2pix_checkpoint_epoch_100.pth.tar"
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    num_epochs = 200
+    num_epochs = 100
     batch_size = 16
     lr = 2e-4
-    lambda_l1 = 100
+    lambda_l1 = 50
 
     print(f"Task: {task}")
     print(f"Edge images directory: {edge_dir}")
