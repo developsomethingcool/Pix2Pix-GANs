@@ -12,17 +12,17 @@ import tarfile
 import os
 
 def main():
-    task = 'train'  # Options: 'train', 'eval', 'generate'
+    task = 'gen'  # Options: 'train', 'eval', 'gen'
     edge_dir = 'edges'
     real_image_dir = 'real_images'
     
-    checkpoint_path = None
-    #checkpoint_path = "pix2pix_checkpoint_epoch_100.pth.tar"
+    #checkpoint_path = None
+    checkpoint_path = "pix2pix_checkpoint_epoch_80.pth.tar"
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     num_epochs = 100
     batch_size = 16
-    lr = 2e-4
+    lr = 4e-4
     lambda_l1 = 100
 
     print(f"Task: {task}")
@@ -52,13 +52,13 @@ def main():
     if task == "train":
         scheduler_gen = optim.lr_scheduler.LambdaLR(
             opt_gen,
-            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
-            #r_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
+            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
         )
         scheduler_disc = optim.lr_scheduler.LambdaLR(
             opt_disc,
-            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
-            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
+            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
         )
     else:
         scheduler_gen = None
@@ -104,7 +104,7 @@ def main():
     elif task == 'eval':
         print("Starting evaluation...")
         evaluate_pix2pix(generator, val_loader, device, save_path='evaluation_results', num_images_to_save=16)
-    elif task == 'generate':
+    elif task == 'gen':
         print("Generating images...")
         generate_images(generator, test_loader, device, save_path='generated_images', num_images_to_save=64)
 

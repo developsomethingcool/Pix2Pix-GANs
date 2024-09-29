@@ -41,9 +41,9 @@ class EdgeToRealDataset(Dataset):
         edge_image = Image.open(edge_image_path).convert("RGB")
         real_image = Image.open(real_image_path).convert("RGB")
 
-        if self augment:
+        if self.augment:
             # Seed ensures same random transformation for edge and real
-            seed = random.random.randint(0,10000)
+            seed = random.randint(0,10000)
             random.seed(seed)
             edge_image = self.common_transforms(edge_image)
             random.seed(seed)

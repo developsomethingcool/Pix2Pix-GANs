@@ -15,7 +15,7 @@ def get_dataloaders(edge_dir, real_image_dir, batch_size=16, val_split=0.2, test
     val_test_dataset = EdgeToRealDataset(edge_dir=edge_dir, real_image_dir=real_image_dir, edge_transform=base_transform, real_transform=base_transform,augment=False) 
 
     # Calculate split sizes for train, val, and test sets
-    dataset_size = len(dataset)
+    dataset_size = len(train_dataset)
     val_size = int(val_split * dataset_size)
     test_size = int(test_split * dataset_size)
     train_size = dataset_size - val_size - test_size
