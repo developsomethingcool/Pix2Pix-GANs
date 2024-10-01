@@ -11,7 +11,7 @@ def get_dataloaders(edge_dir, real_image_dir, batch_size=16, val_split=0.2, test
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
 
-    train_dataset = EdgeToRealDataset(edge_dir=edge_dir, real_image_dir=real_image_dir, edge_transform=base_transform, real_transform=base_transform,augment=True)
+    train_dataset = EdgeToRealDataset(edge_dir=edge_dir, real_image_dir=real_image_dir, edge_transform=base_transform, real_transform=base_transform,augment=False)
     val_test_dataset = EdgeToRealDataset(edge_dir=edge_dir, real_image_dir=real_image_dir, edge_transform=base_transform, real_transform=base_transform,augment=False) 
 
     # Calculate split sizes for train, val, and test sets
