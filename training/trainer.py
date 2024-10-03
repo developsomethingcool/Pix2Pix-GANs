@@ -2,21 +2,21 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-from utils.utils import save_checkpoint, load_checkpoint
+from utils.utils import save_checkpoint, load_checkpoint, generate_images, visualize_results
 
 # Parameters
 n_discriminator_updates = 1  # Update the discriminator once per iteration
 n_generator_updates = 5      # Update the generator twice per iteration
 
-def train_pix2pix(generator, discriminator, dataloader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=100, start_epoch=1, lr=2e-4, lambda_l1=100, device="cuda"):
+def train_pix2pix(generator, discriminator, train_dataloader, visualization_loader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=100, start_epoch=1, lr=2e-4, lambda_l1=100, device="cuda"):
  
     #Binary cross entropy with sigmoid layer
-    criterion_gan = nn.BCEWithLogitsLoss()  
+    criterion_gan = nn.BCELoss()  
     # L1 loss for pixel-wise similarity
     criterion_l1 = nn.L1Loss()    
 
     for epoch in range(start_epoch, num_epochs+1):
-        loop = tqdm(dataloader, leave=True, desc=f"Epoch [{epoch}/{num_epochs}]")
+        loop = tqdm(train_dataloader, leave=True, desc=f"Epoch [{epoch}/{num_epochs}]")
 
         for idx, (edges, reals) in enumerate(loop):
             edges, reals = edges.to(device), reals.to(device)
@@ -28,7 +28,7 @@ def train_pix2pix(generator, discriminator, dataloader, opt_gen, opt_disc, sched
                 generator.eval()
 
                 # Test discriminator on real images
-                preds_real = discriminator(reals)
+                preds_real = discriminator(edges, reals)
 
                 # Dynamically create the real labels 
                 real_label = torch.ones_like(preds_real, device=device)
@@ -40,7 +40,7 @@ def train_pix2pix(generator, discriminator, dataloader, opt_gen, opt_disc, sched
                 fakes = generator(edges)
 
                 #Test discriminator on fake images 
-                preds_fake = discriminator(fakes)
+                preds_fake = discriminator(edges, fakes.detach())
 
                 #Dynamically create fake labels
                 fake_label = torch.zeros_like(preds_fake, device=device)
@@ -68,7 +68,7 @@ def train_pix2pix(generator, discriminator, dataloader, opt_gen, opt_disc, sched
                 #Generate fake images
                 fakes = generator(edges)
                 #Testing discriminator on fake images
-                preds_fake = discriminator(fakes)
+                preds_fake = discriminator(edges, fakes)
                 #Loss of generator on fake images
                 loss_gan = criterion_gan(preds_fake, real_label) 
 
@@ -108,3 +108,6 @@ def train_pix2pix(generator, discriminator, dataloader, opt_gen, opt_disc, sched
                 'scheduler_gen_state_dict': scheduler_gen.state_dict(),
                 'scheduler_disc_state_dict': scheduler_disc.state_dict(),
             }, filename=f"pix2pix_checkpoint_epoch_{epoch}.pth.tar")
+
+        if epoch % 2 == 0:
+            visualize_results(edges, reals, fakes, epoch)

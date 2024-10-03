@@ -12,7 +12,7 @@ import tarfile
 import os
 
 def main():
-    task = 'gen'  # Options: 'train', 'eval', 'gen'
+    task = 'eval'  # Options: 'train', 'eval', 'gen'
     edge_dir = 'edges'
     real_image_dir = 'real_images'
     
@@ -99,7 +99,7 @@ def main():
     # Perform task
     if task == 'train':
         print("Starting training...")
-        train_pix2pix(generator, discriminator, train_loader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=num_epochs, start_epoch=start_epoch, lr=lr, lambda_l1=lambda_l1, device=device)
+        train_pix2pix(generator, discriminator, train_loader, test_loader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=num_epochs, start_epoch=start_epoch, lr=lr, lambda_l1=lambda_l1, device=device)
         
     elif task == 'eval':
         print("Starting evaluation...")
