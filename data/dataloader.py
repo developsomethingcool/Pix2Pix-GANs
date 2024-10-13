@@ -4,7 +4,7 @@ from .dataset import EdgeToRealDataset
 from torchvision import transforms
 import numpy as np
 
-def get_dataloaders(edge_dir, real_image_dir, batch_size=16, val_split=0.2, test_split=0.1, num_workers=4):
+def get_dataloaders(edge_dir, real_image_dir, batch_size=16, val_split=0.2, test_split=0.1, num_workers=4, random_seed=42):
     base_transform = transforms.Compose([
         transforms.Resize((512, 512)),
         transforms.ToTensor(),
@@ -22,6 +22,8 @@ def get_dataloaders(edge_dir, real_image_dir, batch_size=16, val_split=0.2, test
 
     # Randomly shuffle and split dataset indices
     indices = np.arange(dataset_size)
+    
+    np.random.seed(random_seed)
     np.random.shuffle(indices)
 
     # Create subsets using the shuffled indices

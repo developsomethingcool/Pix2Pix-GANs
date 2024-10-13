@@ -42,6 +42,19 @@ def generate_images(generator, dataloader, device, save_path='generated_images',
     print(f"Images saved to {save_path}")
 
 def visualize_results(edges, real_images, fakes, epoch, save_path='visualization_results'):
+    
+    
+    # Check the dimensions of the tensors
+    #print(f"Edges shape: {edges.shape}")
+    #print(f"Real images shape: {real_images.shape}")
+    #print(f"Fakes shape: {fakes.shape}")
+
+    # Ensure tensors are in the correct format: [batch_size, channels, height, width]
+    if len(edges.shape) == 2:
+        edges = edges.unsqueeze(0)  # Add batch dimension if necessary
+    elif len(edges.shape) == 3:
+        edges = edges.unsqueeze(1)  # Add channel dimension if necessary
+
     # Convert tensors to numpy arrays and rescale values
     edges = edges.cpu().detach().numpy().transpose(0, 2, 3, 1) * 0.5 + 0.5
     real_images = real_images.cpu().detach().numpy().transpose(0, 2, 3, 1) * 0.5 + 0.5
@@ -50,23 +63,30 @@ def visualize_results(edges, real_images, fakes, epoch, save_path='visualization
     # Get the minimum number of images to display
     num_images = min(edges.shape[0], 4)
 
-    #Create the save directory if it doesn't exist
+    # Create the save directory if it doesn't exist
     os.makedirs(save_path, exist_ok=True)
 
     # Create a subplot
     fig, axes = plt.subplots(3, num_images, figsize=(15, 8))
     for i in range(num_images):
-        axes[0, i].imshow(edges[i])
-        axes[0, i].axis('off')
-        axes[1, i].imshow(fakes[i])
-        axes[1, i].axis('off')
-        axes[2, i].imshow(real_images[i])
-        axes[2, i].axis('off')
+        if num_images == 1:
+            axes[0].imshow(edges[i])
+            axes[0].axis('off')
+            axes[1].imshow(fakes[i])
+            axes[1].axis('off')
+            axes[2].imshow(real_images[i])
+            axes[2].axis('off')
+        else:
+            axes[0, i].imshow(edges[i])
+            axes[0, i].axis('off')
+            axes[1, i].imshow(fakes[i])
+            axes[1, i].axis('off')
+            axes[2, i].imshow(real_images[i])
+            axes[2, i].axis('off')
 
     plt.suptitle(f'Epoch {epoch}')
-    #plt.show()
-
-     # Save the figure instead of displaying it
+    
+    # Save the figure instead of displaying it
     save_file_path = os.path.join(save_path, f'epoch_{epoch}_visualization.png')
     plt.savefig(save_file_path, bbox_inches='tight')
     plt.close(fig)
