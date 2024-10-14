@@ -68,3 +68,4 @@ class UNetGenerator(nn.Module):
 
         output = self.final_layer(torch.cat([dec7, enc1], 1))
         return output
+

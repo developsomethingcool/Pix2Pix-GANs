@@ -5,8 +5,9 @@ from tqdm import tqdm
 from utils.utils import save_checkpoint, load_checkpoint, generate_images, visualize_results
 
 # Parameters
-n_discriminator_updates = 1  # Update the discriminator once per iteration
-n_generator_updates = 5      # Update the generator twice per iteration
+n_discriminator_updates = 1 
+n_generator_updates = 3      
+
 
 def train_pix2pix(generator, discriminator, train_dataloader, visualization_loader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=100, start_epoch=1, lr=2e-4, lambda_l1=100, device="cuda"):
  
