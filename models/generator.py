@@ -33,9 +33,9 @@ class UNetGenerator(nn.Module):
         self.enc8 = conv_block(512, 512)
 
         # Decoder layers
-        self.dec1 = deconv_block(512, 512)
-        self.dec2 = deconv_block(1024, 512)
-        self.dec3 = deconv_block(1024, 512)
+        self.dec1 = deconv_block(512, 512, dropout=0.2)
+        self.dec2 = deconv_block(1024, 512, dropout=0.2)
+        self.dec3 = deconv_block(1024, 512, dropout=0.2)
         self.dec4 = deconv_block(1024, 512)
         self.dec5 = deconv_block(1024, 256)
         self.dec6 = deconv_block(512, 128)

@@ -12,18 +12,18 @@ import tarfile
 import os
 
 def main():
-    task = 'generate'  # Options: 'train', 'eval', 'generate'
+    task = 'train'  # Options: 'train', 'eval', 'gen'
     edge_dir = 'edges'
     real_image_dir = 'real_images'
     
-    #checkpoint_path = None
-    checkpoint_path = "pix2pix_checkpoint_epoch_100.pth.tar"
+    checkpoint_path = None
+    #checkpoint_path = "pix2pix_checkpoint_epoch_120.pth.tar"
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    num_epochs = 100
+    num_epochs = 200
     batch_size = 16
-    lr = 2e-4
-    lambda_l1 = 50
+    lr = 3e-4
+    lambda_l1 = 100
 
     print(f"Task: {task}")
     print(f"Edge images directory: {edge_dir}")
@@ -52,13 +52,13 @@ def main():
     if task == "train":
         scheduler_gen = optim.lr_scheduler.LambdaLR(
             opt_gen,
-            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
-            #r_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
+            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
         )
         scheduler_disc = optim.lr_scheduler.LambdaLR(
             opt_disc,
-            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
-            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
+            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
         )
     else:
         scheduler_gen = None
@@ -99,12 +99,12 @@ def main():
     # Perform task
     if task == 'train':
         print("Starting training...")
-        train_pix2pix(generator, discriminator, train_loader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=num_epochs, start_epoch=start_epoch, lr=lr, lambda_l1=lambda_l1, device=device)
+        train_pix2pix(generator, discriminator, train_loader, test_loader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=num_epochs, start_epoch=start_epoch, lr=lr, lambda_l1=lambda_l1, device=device)
         
     elif task == 'eval':
         print("Starting evaluation...")
         evaluate_pix2pix(generator, val_loader, device, save_path='evaluation_results', num_images_to_save=16)
-    elif task == 'generate':
+    elif task == 'gen':
         print("Generating images...")
         generate_images(generator, test_loader, device, save_path='generated_images', num_images_to_save=64)
 
