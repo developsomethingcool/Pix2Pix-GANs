@@ -6,7 +6,7 @@ from utils.utils import save_checkpoint, load_checkpoint, generate_images, visua
 
 # Parameters
 n_discriminator_updates = 1 
-n_generator_updates = 3      
+n_generator_updates = 1      
 
 
 def train_pix2pix(generator, discriminator, train_dataloader, visualization_loader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=100, start_epoch=1, lr=2e-4, lambda_l1=100, device="cuda"):
@@ -32,7 +32,8 @@ def train_pix2pix(generator, discriminator, train_dataloader, visualization_load
                 preds_real = discriminator(edges, reals)
 
                 # Dynamically create the real labels 
-                real_label = torch.ones_like(preds_real, device=device)
+                #real_label = torch.ones_like(preds_real, device=device)
+                real_label = torch.full_like(preds_real, 0.9, device=device)
 
                 # Compute the loss of discriminator on real images
                 loss_disc_real = criterion_gan(preds_real, real_label)
@@ -45,6 +46,7 @@ def train_pix2pix(generator, discriminator, train_dataloader, visualization_load
 
                 #Dynamically create fake labels
                 fake_label = torch.zeros_like(preds_fake, device=device)
+                #fake_label = torch.full_like(preds_fake, 0.0, device=device)
 
                 #Compute the loss of discriminator on fake images
                 loss_disc_fake = criterion_gan(preds_fake, fake_label)
@@ -71,6 +73,10 @@ def train_pix2pix(generator, discriminator, train_dataloader, visualization_load
                 #Testing discriminator on fake images
                 preds_fake = discriminator(edges, fakes)
                 #Loss of generator on fake images
+                real_label = torch.ones_like(preds_fake, device=device)
+                real_label = torch.full_like(preds_real, 0.9, device=device)
+
+                #fake_label = torch.zeros_like(preds_fake, device=device)
                 loss_gan = criterion_gan(preds_fake, real_label) 
 
                 #Normalize L1 loss, per pixel difference between fake and real images
@@ -99,7 +105,7 @@ def train_pix2pix(generator, discriminator, train_dataloader, visualization_load
             print(f"Epoch [{epoch}/{num_epochs}] - Generator LR: {current_lr_gen:.6f}, Discriminator LR: {current_lr_disc:.6f}")
 
         # Save checkpoint
-        if (epoch) % 10 == 0:
+        if (epoch) % 5 == 0:
             save_checkpoint({
                 'epoch': epoch,
                 'generator_state_dict': generator.state_dict(),
