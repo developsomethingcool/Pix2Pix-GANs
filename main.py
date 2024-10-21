@@ -16,14 +16,14 @@ def main():
     edge_dir = 'edges'
     real_image_dir = 'real_images'
     
-    checkpoint_path = None
-    #checkpoint_path = "pix2pix_checkpoint_epoch_120.pth.tar"
+    #checkpoint_path = None
+    checkpoint_path = "pix2pix_checkpoint_epoch_30.pth.tar"
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    num_epochs = 200
+    num_epochs = 100
     batch_size = 16
-    lr = 3e-4
-    lambda_l1 = 100
+    lr = 4e-4
+    lambda_l1 = 50
 
     print(f"Task: {task}")
     print(f"Edge images directory: {edge_dir}")
@@ -52,20 +52,20 @@ def main():
     if task == "train":
         scheduler_gen = optim.lr_scheduler.LambdaLR(
             opt_gen,
-            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
-            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
+            #lr_lambda=lambda epoch: 3.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
         )
         scheduler_disc = optim.lr_scheduler.LambdaLR(
             opt_disc,
-            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
-            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+            lr_lambda=lambda epoch: 0.3 - max(0, epoch - num_epochs) / float(num_epochs//2) 
+            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
         )
     else:
         scheduler_gen = None
         scheduler_disc = None
 
     # Load checkpoint
-    start_epoch = 1
+    start_epoch = 31
     if checkpoint_path and os.path.isfile(checkpoint_path):
         print(f"Loading checkpoint from {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path, map_location=device)
