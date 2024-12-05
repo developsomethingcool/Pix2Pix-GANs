@@ -3,6 +3,7 @@ import os
 from torchvision.utils import save_image
 import matplotlib.pyplot as plt
 import numpy as np
+import torch.nn as nn
 
 def save_checkpoint(state, filename='checkpoint.pth.tar'):
     print(f"Saving checkpoint to {filename}")
@@ -45,9 +46,6 @@ def visualize_results(edges, real_images, fakes, epoch, save_path='visualization
     
     
     # Check the dimensions of the tensors
-    #print(f"Edges shape: {edges.shape}")
-    #print(f"Real images shape: {real_images.shape}")
-    #print(f"Fakes shape: {fakes.shape}")
 
     # Ensure tensors are in the correct format: [batch_size, channels, height, width]
     if len(edges.shape) == 2:
@@ -93,27 +91,18 @@ def visualize_results(edges, real_images, fakes, epoch, save_path='visualization
 
     print(f"Saved visualization to {save_file_path}")
 
-# def visualize_images(generator, dataloader, epoch, save_path='visualized_images', num_images_to_save=10):
-#     """
-#     Function to visualize and save images during training.
-#     """
-    
-#     # Correctly set the device as a torch.device object
-#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-
-#      # Debug print
-#     print(f"Visualizing on device: {device}")
-
-#     generator.eval()
-#     os.makedirs(save_path, exist_ok=True) 
-#     print(f"Saving images to: {save_path}")
-
-#     with torch.no_grad():
-#         for i, (edges, _) in enumerate(dataloader):
-#             edges = edges.to(device)  # Make sure device is valid
-#             fakes = generator(edges)
-
-#             if i < num_images_to_save // dataloader.batch_size:
-#                 save_image(fakes, os.path.join(save_path, f'epoch {epoch} generated_{i}.png'), normalize=True)
+def initialize_weights(net):
+    """
+    Networks weights initialization
+    """
+    for m in net.modules():
+        if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
+            nn.init.normal_(m.weight.data, mean=0.0, std=0.02)
+            if m.bias is not None:
+                nn.init.constant_(m.bias.data, 0.0)
+        elif isinstance(m, (nn.InstanceNorm2d, nn.BatchNorm2d)):
+            if m.weight is not None:
+                nn.init.normal_(m.weight.data, mean=1.0, std=0.02)
+            if m.bias is not None:
+                nn.init.constant_(m.bias.data, 0.0)
 

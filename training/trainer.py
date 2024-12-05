@@ -12,7 +12,7 @@ n_generator_updates = 1
 def train_pix2pix(generator, discriminator, train_dataloader, visualization_loader, opt_gen, opt_disc, scheduler_gen, scheduler_disc, num_epochs=100, start_epoch=1, lr=2e-4, lambda_l1=100, device="cuda"):
  
     #Binary cross entropy with sigmoid layer
-    criterion_gan = nn.BCELoss()  
+    criterion_gan = nn.BCELoss()
     # L1 loss for pixel-wise similarity
     criterion_l1 = nn.L1Loss()    
 
@@ -46,7 +46,6 @@ def train_pix2pix(generator, discriminator, train_dataloader, visualization_load
 
                 #Dynamically create fake labels
                 fake_label = torch.zeros_like(preds_fake, device=device)
-                #fake_label = torch.full_like(preds_fake, 0.0, device=device)
 
                 #Compute the loss of discriminator on fake images
                 loss_disc_fake = criterion_gan(preds_fake, fake_label)
@@ -73,7 +72,6 @@ def train_pix2pix(generator, discriminator, train_dataloader, visualization_load
                 #Testing discriminator on fake images
                 preds_fake = discriminator(edges, fakes)
                 #Loss of generator on fake images
-                real_label = torch.ones_like(preds_fake, device=device)
                 real_label = torch.full_like(preds_real, 0.9, device=device)
 
                 #fake_label = torch.zeros_like(preds_fake, device=device)
@@ -116,5 +114,5 @@ def train_pix2pix(generator, discriminator, train_dataloader, visualization_load
                 'scheduler_disc_state_dict': scheduler_disc.state_dict(),
             }, filename=f"pix2pix_checkpoint_epoch_{epoch}.pth.tar")
 
-        if epoch % 2 == 0:
-            visualize_results(edges, reals, fakes, epoch)
+        #if epoch % 1 == 0:
+        visualize_results(edges, reals, fakes, epoch)

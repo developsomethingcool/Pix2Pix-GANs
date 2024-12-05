@@ -7,17 +7,17 @@ from models.generator import UNetGenerator
 from models.discriminator import PatchGANDiscriminator
 from training import train_pix2pix
 from training.evaluator import evaluate_pix2pix
-from utils.utils import load_checkpoint, generate_images
+from utils.utils import load_checkpoint, generate_images, initialize_weights
 import tarfile
 import os
 
 def main():
-    task = 'train'  # Options: 'train', 'eval', 'gen'
+    task = 'gen'  # Options: 'train', 'eval', 'gen'
     edge_dir = 'edges'
     real_image_dir = 'real_images'
     
     #checkpoint_path = None
-    checkpoint_path = "pix2pix_checkpoint_epoch_30.pth.tar"
+    checkpoint_path = "pix2pix_checkpoint_epoch_40.pth.tar"
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     num_epochs = 100
@@ -43,6 +43,12 @@ def main():
     generator = UNetGenerator().to(device)
     discriminator = PatchGANDiscriminator().to(device) if task == 'train' else None
 
+    # Initialize weights for generator and discriminator if training
+    if task == 'train':
+        print("Initializing weights for generator and discriminator...")
+        initialize_weights(generator)
+        initialize_weights(discriminator)
+
     # Initialize optimizers
     opt_gen = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))
     opt_disc = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999)) if task == 'train' else None
@@ -51,21 +57,19 @@ def main():
     #Initializing learning rate scheduler
     if task == "train":
         scheduler_gen = optim.lr_scheduler.LambdaLR(
-            opt_gen,
-            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs) / float(num_epochs//2) 
-            #lr_lambda=lambda epoch: 3.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+            opt_gen, 
+            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
         )
         scheduler_disc = optim.lr_scheduler.LambdaLR(
-            opt_disc,
-            lr_lambda=lambda epoch: 0.3 - max(0, epoch - num_epochs) / float(num_epochs//2) 
-            #lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
+            opt_disc, 
+            lr_lambda=lambda epoch: 1.0 - max(0, epoch - num_epochs//2) / float(num_epochs//2)
         )
     else:
         scheduler_gen = None
         scheduler_disc = None
 
     # Load checkpoint
-    start_epoch = 31
+    start_epoch = 1
     if checkpoint_path and os.path.isfile(checkpoint_path):
         print(f"Loading checkpoint from {checkpoint_path}")
         checkpoint = torch.load(checkpoint_path, map_location=device)

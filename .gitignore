@@ -37,3 +37,7 @@ evaluation_results/*
 
 # Ignore virtual environment
 pix2pix/
+
+# Ignore all .pth files
+*.pth.tar
+
