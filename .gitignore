@@ -34,3 +34,6 @@ evaluation_results/*
 !visualization_results/.gitkeep
 !generated_images/.gitkeep
 !evaluation_results/.gitkeep
+
+# Ignore virtual environment
+pix2pix/
