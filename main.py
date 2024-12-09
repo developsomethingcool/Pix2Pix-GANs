@@ -12,12 +12,12 @@ import tarfile
 import os
 
 def main():
-    task = 'gen'  # Options: 'train', 'eval', 'gen'
+    task = 'train'  # Options: 'train', 'eval', 'gen'
     edge_dir = 'edges'
     real_image_dir = 'real_images'
     
-    #checkpoint_path = None
-    checkpoint_path = "pix2pix_checkpoint_epoch_40.pth.tar"
+    checkpoint_path = None
+    #checkpoint_path = "pix2pix_checkpoint_epoch_40.pth.tar"
     
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     num_epochs = 100

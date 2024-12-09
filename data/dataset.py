@@ -18,7 +18,7 @@ class EdgeToRealDataset(Dataset):
 
         assert len(self.edge_images) == len(self.real_images), "Number of edge images should be the same as number of real images"
 
-        #augmentation applied to both edges andreals
+        #augmentation applied to both edges and reals
         self.common_transforms = transforms.Compose([
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomRotation(degrees=10),

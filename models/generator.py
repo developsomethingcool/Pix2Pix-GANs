@@ -1,9 +1,6 @@
 import torch
 import torch.nn as nn
 
-import torch
-import torch.nn as nn
-
 class UNetGenerator(nn.Module):
     def __init__(self):
         super(UNetGenerator, self).__init__()
