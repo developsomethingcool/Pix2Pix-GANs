@@ -48,7 +48,7 @@ Pix2Pix is a supervised learning model that learns a mapping from input images (
 1. Clone the repository:
    ```bash
    git clone https://github.com/developsomethingcool/Pix2Pix-GANs
-   cd pix2pix-framework
+   cd Pix2Pix-GANs
 
 2. Install dependencies:
    ```bash
