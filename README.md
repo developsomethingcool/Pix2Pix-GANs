@@ -77,25 +77,28 @@ python main.py --task gen --edge_dir <path_to_edge_images>
 
 ### Project Structure
 
+```
 pix2pix-framework/
-├── data/                   # Dataloader utilities
+├── data/                    # Dataloader utilities
 │   ├── __init__.py
-│   ├── dataloader.py       # DataLoader creation and dataset splitting
-│   └── dataset.py          # Custom dataset for edge-to-real image pairs
-├── models/                 # Generator and discriminator architectures
+│   ├── dataloader.py        # DataLoader creation and dataset splitting
+│   └── dataset.py           # Custom dataset for edge-to-real image pairs
+├── models/                  # Generator and discriminator architectures
 │   ├── __init__.py
-│   ├── generator.py        # UNet generator architecture
-│   └── discriminator.py    # PatchGAN discriminator
-├── training/               # Training and evaluation logic
+│   ├── generator.py         # UNet generator architecture
+│   └── discriminator.py     # PatchGAN discriminator
+├── training/                # Training and evaluation logic
 │   ├── __init__.py
-│   ├── trainer.py          # Training loop
-│   └── evaluator.py        # Evaluation loop
-├── utils/                  # Helper functions
+│   ├── trainer.py           # Training loop
+│   └── evaluator.py         # Evaluation loop
+├── utils/                   # Helper functions
 │   ├── __init__.py
-│   └── utils.py            # Utilities for checkpointing, visualization, etc.
-├── main.py                 # Entry point for training, evaluation, and generation
-├── requirements.txt        # Python dependencies
-└── README.md               # Project documentation
+│   └── utils.py             # Utilities for checkpointing, visualization, etc.
+├── main.py                  # Entry point for training, evaluation, and generation
+├── requirements.txt         # Python dependencies
+└── README.md                # Project documentation
+```
+
 
 ## Configuration
 
