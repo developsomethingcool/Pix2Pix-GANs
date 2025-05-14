@@ -62,19 +62,16 @@ Pix2Pix is a supervised learning model that learns a mapping from input images (
 ### Training
 
 To train the Pix2Pix model:
-```bash
 python main.py --task train --edge_dir <path_to_edge_images> --real_image_dir <path_to_real_images>
 
 ### Evaluation
 
 To evaluate the model on a validation set:
-```bash
 python main.py --task eval --edge_dir <path_to_edge_images> --real_image_dir <path_to_real_images>
 
 ### Image Generation
 
 To generate images using the trained generator:
-```bash
 python main.py --task gen --edge_dir <path_to_edge_images>
 
 
